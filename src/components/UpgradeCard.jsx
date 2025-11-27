@@ -23,11 +23,11 @@ const UpgradeCard = ({ upgradeId }) => {
       transition: 'opacity 0.3s ease'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, color: 'var(--color-accent)' }}>{upgrade.name}</h3>
+        <h3 style={{ margin: 0, color: 'var(--color-accent)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{upgrade.name}</h3>
         <ArrowUpCircle size={20} color="var(--color-accent)" />
       </div>
       
-      <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
+      <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: '#e0e0e0', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
         {upgrade.description}
       </p>
 

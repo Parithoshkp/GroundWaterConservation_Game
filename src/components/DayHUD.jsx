@@ -22,7 +22,7 @@ const DayHUD = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <Calendar size={18} color="var(--color-primary)" />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Day {stats.day}</span>
+          <span style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Day {stats.day}</span>
           <span style={{ fontWeight: 'bold', color: 'var(--color-text)' }}>{dayName}</span>
         </div>
       </div>
@@ -32,7 +32,7 @@ const DayHUD = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <CloudRain size={18} color="var(--color-accent)" />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Forecast</span>
+          <span style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Forecast</span>
           <span style={{ fontWeight: 'bold', color: 'var(--color-text)' }}>{stats.forecast || 'Clear'}</span>
         </div>
       </div>

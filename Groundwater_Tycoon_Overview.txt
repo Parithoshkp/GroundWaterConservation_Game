@@ -1,0 +1,104 @@
+GROUNDWATER TYCOON - PROJECT OVERVIEW
+
+1. WHAT IS THIS PROJECT?
+-----------------------
+Groundwater Tycoon is a web-based strategy simulation game. Imagine you are the manager of a water processing facility. Your job is to extract groundwater, clean it, and sell it, all while trying to protect the environment.
+
+It is a "Tycoon" style game, meaning the focus is on management, upgrading your facility, and balancing your economy.
+
+2. KEY FEATURES
+---------------
+*   **Resource Management:** You have to manage three main things:
+    *   Money ($): Used to buy buildings and upgrades.
+    *   Polluted Water: Extracted from the ground.
+    *   Clean Water: Created by purifying polluted water.
+
+*   **The Game Loop:**
+    1.  **Pump:** Use pumps to get water from the aquifer (underground water layer).
+    2.  **Purify:** Turn dirty water into clean water using Purifiers.
+    3.  **Sell:** Sell the clean water to make money.
+    4.  **Protect:** Watch out for pollution! If it gets too high, you need to plant trees or organize cleanups.
+
+*   **Save System:**
+    *   The game uses **Google Login**.
+    *   If you log in, your game saves automatically to the cloud (Firebase).
+    *   You can close the browser, go to a different computer, log in, and your game will be exactly where you left it.
+    *   If you don't log in, you can still play as a guest, but you lose progress when you close the tab.
+
+*   **Dynamic World:**
+    *   **Day/Night Cycle:** The game tracks days.
+    *   **Weather:** It can rain! Rain helps refill your underground water supply.
+    *   **Events:** Random things happen, like "Pipeline Leaks" (bad) or "Government Grants" (good).
+
+*   **Upgrades:**
+    *   You can buy research upgrades like "Solar Power" (cheaper buildings) or "Advanced Filtration" (faster purifying) to make your facility better.
+
+3. HOW IT WAS BUILT (NON-TECHNICAL SUMMARY)
+-------------------------------------------
+*   **The Interface (Frontend):** Built using **React**. Think of React as a set of Lego blocks for building websites. We created blocks for "Cards", "Buttons", and "Menus" and put them together.
+*   **The Brains (Logic):** We used **JavaScript** to handle the math. Every second (or "tick"), the game calculates how much water you pumped, how much money you made, and updates the numbers.
+*   **The Memory (Backend):** We used **Firebase** (a tool by Google).
+    *   **Authentication:** Handles the secure "Sign in with Google" button.
+    *   **Database (Firestore):** A digital filing cabinet in the cloud where we store your save file.
+
+4. RECENT IMPROVEMENTS
+----------------------
+*   **New Menu:** A clean start screen with a "Pixel Art" style.
+*   **Better Readability:** We made all the text larger and added shadows so it's easy to read against the background.
+*   **Pause Button:** You can now pause the game, which also saves your progress immediately.
+*   **Profile Privacy:** When you log in, we only show your email (not your photo or full name) to keep the interface clean.
+
+5. BASIC QUESTIONS & ANSWERS (FAQ)
+----------------------------------
+
+Q: What is the goal of the game?
+A: To build a successful water company without destroying the environment. You want to make money, but if you drain the aquifer dry or pollute it too much, you can't operate.
+
+Q: How do I save my game?
+A: Just log in with your Google account! The game automatically saves every 30 seconds and whenever you pause.
+
+Q: What happens if I run out of water?
+A: You have to wait for rain to refill the aquifer, or buy the "Cloud Seeding" upgrade to make rain more effective.
+
+Q: Why does the game look "retro"?
+A: We used a "Pixel Art" font and style to give it a classic video game feel.
+
+Q: Can I play on my phone?
+A: Yes, the game is designed to fit on different screen sizes, though it looks best on a computer.
+
+Q: What happens if I find a bug or the screen goes white?
+A: We added safety code (error handling). If something breaks (like the database connection), the game tries to keep running in "Guest Mode" so you can still play.
+
+6. TECHNICAL QUESTIONS & ANSWERS (FOR DEVELOPERS/JUDGES)
+--------------------------------------------------------
+
+Q: What tech stack is used?
+A: 
+*   **Frontend:** React (Vite) for the UI and component structure.
+*   **State Management:** Zustand. It's a lightweight library that manages the global game state (resources, buildings, stats) without the complexity of Redux.
+*   **Backend/BaaS:** Firebase. We use Firebase Authentication for login and Cloud Firestore for the NoSQL database.
+*   **Styling:** CSS Modules / Vanilla CSS with CSS Variables for theming (dark mode, colors, fonts).
+
+Q: How is the game loop implemented?
+A: The game loop uses a `useEffect` hook in `App.jsx` with `requestAnimationFrame` or `setInterval` (we used `setInterval` for simplicity in this version). It calls the `tick()` function in the Zustand store every second to update resources, calculate production, and trigger random events.
+
+Q: How does the save system work technically?
+A: 
+*   We use `firebase/firestore`.
+*   The `saveGame` function takes the entire Zustand state object, serializes it to JSON, and writes it to a document in the `gameProgress` collection, keyed by the user's `uid`.
+*   `loadGame` fetches this document and calls `useGameStore.setState()` to hydrate the store with the saved data.
+*   We use `useEffect` to trigger an auto-save every 30 seconds if `currentUser` exists.
+
+Q: Why use Zustand instead of React Context?
+A: Zustand is much faster for frequent updates (like a game loop) because it avoids unnecessary re-renders. React Context would trigger a re-render of the entire app tree on every "tick", which would cause performance issues.
+
+Q: How is the "Pixel Art" font handled?
+A: We use a custom `@font-face` declaration in `index.css` pointing to a local `.ttf` file. We then use a CSS variable `--font-main` to apply it globally, ensuring consistent typography across all components.
+
+Q: How do you handle "Guest Mode" vs "Logged In"?
+A: 
+*   The `App.jsx` component listens to Firebase Auth state.
+*   If `user` is null, the game runs entirely in local memory (RAM).
+*   If `user` exists, the game syncs local memory with Firestore.
+*   This "offline-first" approach ensures the game is playable even without an internet connection (though saving requires it).
+

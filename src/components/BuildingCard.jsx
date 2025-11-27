@@ -19,7 +19,7 @@ const BuildingCard = ({ building }) => {
       transition: 'opacity 0.3s ease'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>{building.name}</h3>
+        <h3 style={{ margin: 0, color: 'var(--color-primary)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{building.name}</h3>
         <span style={{ 
           background: 'var(--color-bg)', 
           padding: '0.25rem 0.5rem', 
@@ -31,18 +31,18 @@ const BuildingCard = ({ building }) => {
         </span>
       </div>
       
-      <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>
+      <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: '#e0e0e0', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
         {building.description}
       </p>
 
       <div style={{ display: 'flex', gap: '1rem', fontSize: 'var(--font-size-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
           <Droplets size={14} color="var(--color-primary)" />
-          <span>+{building.productionRate}/s</span>
+          <span style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>+{building.productionRate}/s</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
           <Factory size={14} color="var(--color-accent)" />
-          <span>+{building.pollutionRate}% Pol</span>
+          <span style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>+{building.pollutionRate}% Pol</span>
         </div>
       </div>
 

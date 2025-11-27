@@ -1,14 +1,19 @@
+@font-face {
+  font-family: 'PixelArt';
+  src: url('../assets/fonts/Pix32.ttf') format('truetype');
+}
+
 :root {
   /* Colors */
   --color-bg: #0a0a12;
   --color-bg-secondary: #14141f;
-  --color-bg-tertiary: rgba(0, 0, 0, 0.6); /* Darker semi-transparent for better text contrast */
-  --color-primary: #00d4ff; /* Cyan for clean water */
+  --color-bg-tertiary: rgba(0, 0, 0, 0.6);
+  --color-primary: #00d4ff;
   --color-primary-dim: #007ea7;
-  --color-accent: #ff0055; /* Red/Pink for pollution/alerts */
+  --color-accent: #ff0055;
   --color-success: #00ff9d;
-  --color-text: #ffffff; /* Pure white for maximum readability */
-  --color-text-muted: #b0b0c0; /* Brighter muted text */
+  --color-text: #ffffff;
+  --color-text-muted: #b0b0c0;
   --color-border: #2a2a35;
 
   /* Gradients */
@@ -24,11 +29,11 @@
   --spacing-xl: 2rem;
 
   /* Typography */
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 2rem;
+  --font-family: 'PixelArt', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-sm: 1rem; /* Increased from 0.875rem */
+  --font-size-base: 1.125rem; /* Increased from 1rem */
+  --font-size-lg: 1.5rem; /* Increased from 1.25rem */
+  --font-size-xl: 2.25rem; /* Increased from 2rem */
 
   /* Effects */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -47,7 +52,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-family);
   margin: 0;
-  overflow: hidden; /* Game usually fits screen */
+  overflow: hidden;
   text-shadow: var(--text-shadow);
 }
 

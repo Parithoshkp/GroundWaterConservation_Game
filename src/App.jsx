@@ -10,10 +10,15 @@ import shopBackground from './assets/shop_bg.png';
 import CarSprite from './assets/car.png';
 import WaterPumpSprite from './assets/waterpump.png';
 
+import MainMenu from './components/MainMenu';
+import { auth } from './firebaseConfig';
+
 function App() {
-  const { resources, stats, buildings, upgrades, activeEvent, clearEvent, manualCollect, purifyWater, sellCleanWater, plantTree, organizeCleanup, tick } = useGameStore();
+  const { resources, stats, buildings, upgrades, activeEvent, clearEvent, manualCollect, purifyWater, sellCleanWater, plantTree, organizeCleanup, tick, saveGame, loadGame, resetGame } = useGameStore();
+  const [gameState, setGameState] = useState('menu'); // 'menu' | 'playing'
   const [activeTab, setActiveTab] = useState('dashboard');
   const [shopTab, setShopTab] = useState('buildings'); // New state for shop tabs
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Click pop effect handler
   const handleButtonClick = (e, callback) => {
@@ -28,13 +33,45 @@ function App() {
     if (callback) callback();
   };
 
+  // Auth state listener
+  useEffect(() => {
+    if (!auth) return;
+    
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      if (user && gameState === 'playing') {
+        // Load user's saved game when they log in
+        loadGame(user.uid);
+      } else if (!user && gameState === 'playing') {
+        // Reset to default state when logged out
+        resetGame();
+      }
+    });
+    
+    return () => unsubscribe();
+  }, [gameState]);
+
+  // Auto-save every 30 seconds when playing and logged in
+  useEffect(() => {
+    if (gameState !== 'playing' || !currentUser) return;
+    
+    const saveInterval = setInterval(() => {
+      saveGame(currentUser.uid);
+    }, 30000); // Save every 30 seconds
+    
+    return () => clearInterval(saveInterval);
+  }, [gameState, currentUser, saveGame]);
+
   // Game Loop
   useEffect(() => {
+    if (gameState !== 'playing') return; // Pause game loop when in menu
+
     const interval = setInterval(() => {
       tick();
-    }, 1000); // 1 tick per second for now
+    }, 1000); // 1 tick per second
+
     return () => clearInterval(interval);
-  }, [tick]);
+  }, [tick, gameState]);
 
   // Auto-dismiss event notifications after 5 seconds
   useEffect(() => {
@@ -46,15 +83,27 @@ function App() {
     }
   }, [activeEvent, clearEvent]);
 
+  if (gameState === 'menu') {
+    return <MainMenu onPlay={async () => {
+      if (currentUser) {
+        await loadGame(currentUser.uid);
+      } else {
+        resetGame();
+      }
+      setGameState('playing');
+    }} />;
+  }
+
   return (
     <div style={{
       width: '100vw',
       height: '100vh',
+      overflow: 'hidden',
       backgroundImage: `url(${activeTab === 'store' ? shopBackground : gameBackground})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      overflow: 'hidden',
+      color: 'white',
+      fontFamily: 'var(--font-main)',
       position: 'relative',
       transition: 'background-image 0.3s ease'
     }}>
@@ -100,6 +149,43 @@ function App() {
             </div>
           </div>
 
+          {/* Center - Pause Button */}
+          <button
+            onClick={async () => {
+              // Save before pausing if logged in
+              if (currentUser) {
+                await saveGame(currentUser.uid);
+                console.log('Game saved before pause');
+              }
+              setGameState('menu');
+            }}
+            style={{
+              background: 'rgba(0, 0, 0, 0.6)',
+              border: '1px solid var(--color-primary)',
+              color: 'var(--color-primary)',
+              padding: '0.75rem 1.5rem',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              fontSize: '1.125rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease',
+              alignSelf: 'flex-start'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 255, 255, 0.2)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            ⏸ PAUSE
+          </button>
+
           {/* Right side - Title and DayHUD */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
             <h1 style={{ margin: 0, color: 'var(--color-primary)', fontSize: '1.5rem', textShadow: 'var(--text-shadow-strong)' }}>Groundwater Tycoon</h1>
@@ -138,7 +224,7 @@ function App() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 fontWeight: 'bold',
-                fontSize: '1rem'
+                fontSize: '1.25rem'
               }}
             >
               ← Back to Water Pump
@@ -161,7 +247,7 @@ function App() {
                   padding: '0.75rem 1.5rem',
                   cursor: 'pointer',
                   fontWeight: 'bold',
-                  fontSize: '1rem',
+                  fontSize: '1.25rem',
                   marginBottom: '-2px',
                   transition: 'all 0.2s ease'
                 }}
@@ -178,7 +264,7 @@ function App() {
                   padding: '0.75rem 1.5rem',
                   cursor: 'pointer',
                   fontWeight: 'bold',
-                  fontSize: '1rem',
+                  fontSize: '1.25rem',
                   marginBottom: '-2px',
                   transition: 'all 0.2s ease'
                 }}
@@ -254,7 +340,7 @@ function App() {
       {activeEvent && (
         <div style={{
           position: 'fixed',
-          top: '2rem',
+          top: '6rem', // Changed from 2rem to move below header
           left: '2rem',
           background: 'rgba(0, 0, 0, 0.5)',
           border: '1px solid var(--color-primary)',
@@ -383,7 +469,7 @@ function App() {
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-sm)',
                 whiteSpace: 'nowrap',
-                fontSize: '0.9rem',
+                fontSize: '1.1rem',
                 opacity: '0',
                 visibility: 'hidden',
                 transition: 'opacity 0.2s ease, visibility 0.2s ease',
@@ -392,7 +478,7 @@ function App() {
                 zIndex: 1000
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Purify Water</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Convert 1 Polluted &rarr; 1 Clean</div>
+                <div style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>Convert 1 Polluted &rarr; 1 Clean</div>
                 {/* Arrow */}
                 <div style={{
                   position: 'absolute',
@@ -454,7 +540,7 @@ function App() {
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-sm)',
                 whiteSpace: 'nowrap',
-                fontSize: '0.9rem',
+                fontSize: '1.1rem',
                 opacity: '0',
                 visibility: 'hidden',
                 transition: 'opacity 0.2s ease, visibility 0.2s ease',
@@ -463,7 +549,7 @@ function App() {
                 zIndex: 1000
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Sell Water</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Sell 1 Clean Water for $5</div>
+                <div style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>Sell 1 Clean Water for $5</div>
                 {/* Arrow */}
                 <div style={{
                   position: 'absolute',
@@ -534,7 +620,7 @@ function App() {
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-sm)',
                 whiteSpace: 'nowrap',
-                fontSize: '0.9rem',
+                fontSize: '1.1rem',
                 opacity: '0',
                 visibility: 'hidden',
                 transition: 'opacity 0.2s ease, visibility 0.2s ease',
@@ -543,7 +629,7 @@ function App() {
                 zIndex: 1000
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Plant Tree ($50)</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Reduces pollution by 1%</div>
+                <div style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>Reduces pollution by 1%</div>
                 {/* Arrow */}
                 <div style={{
                   position: 'absolute',
@@ -605,7 +691,7 @@ function App() {
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-sm)',
                 whiteSpace: 'nowrap',
-                fontSize: '0.9rem',
+                fontSize: '1.1rem',
                 opacity: '0',
                 visibility: 'hidden',
                 transition: 'opacity 0.2s ease, visibility 0.2s ease',
@@ -614,7 +700,7 @@ function App() {
                 zIndex: 1000
               }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Organize Cleanup ($500)</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Reduces pollution by 10%</div>
+                <div style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>Reduces pollution by 10%</div>
                 {/* Arrow */}
                 <div style={{
                   position: 'absolute',
@@ -675,7 +761,7 @@ function App() {
                 justifyContent: 'center'
               }}>
                 <span style={{ 
-                  fontSize: '0.75rem', 
+                  fontSize: '0.95rem', 
                   fontWeight: 'bold', 
                   color: 'black',
                   textShadow: '0 0 2px rgba(255,255,255,0.5)'
@@ -693,7 +779,7 @@ function App() {
               padding: '0.5rem 1rem',
               borderRadius: 'var(--radius-sm)',
               whiteSpace: 'nowrap',
-              fontSize: '0.85rem',
+              fontSize: '1.05rem',
               opacity: '0',
               visibility: 'hidden',
               transition: 'opacity 0.2s ease, visibility 0.2s ease',
@@ -748,7 +834,7 @@ function App() {
                 justifyContent: 'center'
               }}>
                 <span style={{ 
-                  fontSize: '0.75rem', 
+                  fontSize: '0.95rem', 
                   fontWeight: 'bold', 
                   color: 'black',
                   textShadow: '0 0 2px rgba(255,255,255,0.5)'
@@ -766,7 +852,7 @@ function App() {
               padding: '0.5rem 1rem',
               borderRadius: 'var(--radius-sm)',
               whiteSpace: 'nowrap',
-              fontSize: '0.85rem',
+              fontSize: '1.05rem',
               opacity: '0',
               visibility: 'hidden',
               transition: 'opacity 0.2s ease, visibility 0.2s ease',
